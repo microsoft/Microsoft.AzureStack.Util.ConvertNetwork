@@ -18,9 +18,21 @@ function Get-CidrFromSubnetMask {
 
     # Using a subnet mask, count the 1's in the binary output to determine the Cidr.
     $Private:bits = 0
-    $SubnetMask.GetAddressBytes() | ForEach-Object {
+    
+    $bMask = $SubnetMask.GetAddressBytes()
+
+    # Validate that the subnet mask is contiguous (e.g., 255.255.255.0 is valid, but 255.0.255.0 is not).
+    $binaryMask = -join ($bMask | ForEach-Object { [Convert]::ToString($_, 2).PadLeft(8, '0') })
+    if ($binaryMask -notmatch '^1*0*$') {
+        throw "Invalid Subnet Mask: $($SubnetMask.IPAddressToString) - Subnet masks must be contiguous."
+    }
+
+    $bMask | ForEach-Object {
+
+        # Convert the byte to a binary string.
         $binary = [System.Convert]::ToString($_, 2)
-        $bits += $binary.TrimEnd('0').Length
+        # Count the number of 1's in the binary string.
+        $bits += [System.Int32]$binary.TrimEnd('0').Length
     }
 
     return $bits
@@ -49,10 +61,14 @@ function Get-SubnetMaskFromCidr {
     [OutputType([IPAddress])]
     param (
         [Parameter(Mandatory = $true)]
-        [ValidateRange(0, 32)]
         [int32]
         $Cidr
     )
+
+    # validate the CIDR value is between 0 and 32.
+    if ($Cidr -lt 0 -or $Cidr -gt 32) {
+        throw "Invalid CIDR value: $Cidr"
+    }
 
     # Create a 32bit binary string
     $Private:binary = ('1' * $Cidr).PadRight(32, '0')
