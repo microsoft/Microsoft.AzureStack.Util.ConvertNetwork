@@ -8,9 +8,9 @@
     <Configuration Condition="'$(Configuration)'==''">Debug</Configuration>
     <BinariesBuildDirectory>$(MSBuildProjectDirectory)\out</BinariesBuildDirectory>
     <Package>$(MSBuildProjectDirectory)\out\packages</Package>
-    <PesterVersion>5.3.0</PesterVersion>
+    <PesterVersion>5.2.0</PesterVersion>
     <!-- Set the custom NuGet packages directory -->
-    <RestorePackagesPath>$(Package)</RestorePackagesPath>
+    <RestorePackagesPath>$(MSBuildProjectDirectory)\out\packages</RestorePackagesPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,7 +25,7 @@
   <Target Name="CopyPester" AfterTargets="PlaceFiles">
     <!-- Include all files recursively from the Pester package directory -->
     <ItemGroup>
-      <PesterFiles Include="$(Package)\pester\$(PesterVersion)\tools\**\*" />
+      <PesterFiles Include="$(RestorePackagesPath)\pester\$(PesterVersion)\tools\**\*" Exclude="*.nupkg;*.nuspec" />
     </ItemGroup>
     <Copy SourceFiles="@(PesterFiles)" DestinationFolder="$(BinariesBuildDirectory)\PowerShell\Modules\Pester\$(PesterVersion)\%(RecursiveDir)" />
   </Target>
