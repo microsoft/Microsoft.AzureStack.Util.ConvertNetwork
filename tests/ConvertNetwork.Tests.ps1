@@ -106,6 +106,72 @@
                 $result =  New-MicrosoftAzureStackUtilConvertNetwork -IPv4Address 10.10.13.20 -CIDR 22
                 $result.Broadcast | Should -Be "10.10.15.255"
             }
+            It "Should throw invalid IPv4Address"{
+                { New-MicrosoftAzureStackUtilConvertNetwork -IPv4Address 10.10.13.256 -CIDR 22 } | Should -Throw
+            }
+            It "Should throw invalid Cidr"{
+                { New-MicrosoftAzureStackUtilConvertNetwork -IPv4Address 10.10.13.20 -CIDR 35 } | Should -Throw
+            }
+            It "Should throw invalid Cidr"{
+                { New-MicrosoftAzureStackUtilConvertNetwork -IPv4Address 10.10.13.20 -CIDR 'two' } | Should -Throw
+            }
+        }
+
+        Context "Convert-Network" {
+            It "Should create a PS Object containing IPv4Address"{
+                $result = Convert-Network -IPv4Address 10.10.13.20 -CIDR 22
+                $result.IPv4Address | Should -Be "10.10.13.20"
+            }
+            It "Should create a PS Object containing Network"{
+                $result = Convert-Network -IPv4Address 10.10.13.20 -CIDR 22
+                $result.Network | Should -Be "10.10.12.0"
+            }
+            It "Should create a PS Object containing Cidr"{
+                $result = Convert-Network -IPv4Address 10.10.13.20 -CIDR 22
+                $result.Cidr | Should -Be "22"
+            }
+            It "Should create a PS Object containing Mask"{
+                $result = Convert-Network -IPv4Address 10.10.13.20 -CIDR 22
+                $result.Mask | Should -Be "255.255.252.0"
+            }
+            It "Should create a PS Object containing InverseMask"{
+                $result = Convert-Network -IPv4Address 10.10.13.20 -CIDR 22
+                $result.InverseMask | Should -Be "0.0.3.255"
+            }
+            It "Should create a PS Object containing Broadcast"{
+                $result = Convert-Network -IPv4Address 10.10.13.20 -CIDR 22
+                $result.Broadcast | Should -Be "10.10.15.255"
+            }
+        }
+        Context "Get-IPCountInNetwork" {
+            It "Should return the correct number of IPs in a network" {
+                $result = Get-IPCountInNetwork -CIDR 22
+                $result | Should -Be 1024
+            }
+            It "Should throw an error for an invalid CIDR" {
+                {Get-IPCountInNetwork -CIDR 35} | Should -Throw
+            }
+        }
+        Context "Export-SubnetFromAddress" {
+            It "Should create PSObject containing subnets from an address" {
+                $subnets = Export-SubnetFromAddress -Subnet '10.10.10.0' -Cidr 24 -NewCidr 26
+                $subnets | Should -Not -BeNullOrEmpty
+                $subnets.Position.Count | Should -Be 4
+                $subnets.Network[0] | Should -Be '10.10.10.0'
+                $subnets.Network[1] | Should -Be '10.10.10.64'
+                $subnets.Network[2] | Should -Be '10.10.10.128'
+                $subnets.Network[3] | Should -Be '10.10.10.192'
+            }
+        }
+        Context "Get-BroadcastAddressFromIP" {
+            It "Should return Broadcast address with Cidr" {
+                $result = Get-BroadcastAddressFromIP -IPv4Address '10.10.10.10' -Cidr 30
+                $result.IPAddressToString | Should -Be '10.10.10.11'
+            }
+            It "Should return Broadcast address with IPv4Mask" {
+                $result = Get-BroadcastAddressFromIP -IPv4Address '10.10.10.10' -IPv4Mask 255.255.255.252
+                $result.IPAddressToString | Should -Be '10.10.10.11'
+            }
         }
     }
 
