@@ -19,6 +19,27 @@ function Get-CidrFromSubnetMask {
     # Using a subnet mask, count the 1's in the binary output to determine the Cidr.
     $Private:bits = 0
     
+    if( Test-SubnetMask -SubnetMask $SubnetMask ) {
+        $bMask = $SubnetMask.GetAddressBytes()
+        $bMask | ForEach-Object {
+
+            # Convert the byte to a binary string.
+            $binary = [System.Convert]::ToString($_, 2)
+            # Count the number of 1's in the binary string.
+            $bits += [System.Int32]$binary.TrimEnd('0').Length
+        }
+    }
+
+    return $bits
+}
+
+function Test-SubnetMask {
+    param(
+        [Parameter(Mandatory = $true)]
+        [IPAddress]
+        $SubnetMask
+    )
+    
     $bMask = $SubnetMask.GetAddressBytes()
 
     # Validate that the subnet mask is contiguous (e.g., 255.255.255.0 is valid, but 255.0.255.0 is not).
@@ -26,16 +47,7 @@ function Get-CidrFromSubnetMask {
     if ($binaryMask -notmatch '^1*0*$') {
         throw "Invalid Subnet Mask: $($SubnetMask.IPAddressToString) - Subnet masks must be contiguous."
     }
-
-    $bMask | ForEach-Object {
-
-        # Convert the byte to a binary string.
-        $binary = [System.Convert]::ToString($_, 2)
-        # Count the number of 1's in the binary string.
-        $bits += [System.Int32]$binary.TrimEnd('0').Length
-    }
-
-    return $bits
+    return $true
 }
 
 function Get-SubnetMaskFromCidr {
@@ -110,13 +122,15 @@ function Get-IPHostMaskFromSubnetMask {
         $SubnetMask
     )
 
-    # Using the subnet mask, invert the values and return the inverse mask.
-    $aIP = $SubnetMask.GetAddressBytes()
-    $aInverse = $aIP | ForEach-Object {
-        255 -bxor $_
-    }
+    if( Test-SubnetMask -SubnetMask $SubnetMask ) {
+        # Using the subnet mask, invert the values and return the inverse mask.
+        $aIP = $SubnetMask.GetAddressBytes()
+        $aInverse = $aIP | ForEach-Object {
+            255 -bxor $_
+        }
 
-    [System.Net.IPAddress]$inverse = $aInverse -join ('.')
+        [System.Net.IPAddress]$inverse = $aInverse -join ('.')
+    }
     return $inverse
 }
 
@@ -571,3 +585,6 @@ function New-MicrosoftAzureStackUtilConvertNetwork {
         Write-Verbose -Message "Exit $($MyInvocation.MyCommand.Name)"
     }
 }
+
+# Create an alias for the function
+Set-Alias -Name Convert-Network -Value New-MicrosoftAzureStackUtilConvertNetwork -ErrorAction SilentlyContinue
