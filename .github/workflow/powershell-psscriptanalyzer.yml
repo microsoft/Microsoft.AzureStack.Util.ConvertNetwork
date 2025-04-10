@@ -28,6 +28,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
 
       - name: Run PSScriptAnalyzer
         uses: microsoft/psscriptanalyzer-action@6b2948b1944407914a58661c49941824d149734f
@@ -45,3 +49,16 @@ jobs:
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: results.sarif
+
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore
+
+      # run powershell script /tests/setupTest.ps1 to run pester unit-testing
+      - name: Run Pester tests
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $PSScriptRoot = (Get-Item -Path $MyInvocation.MyCommand.Path).DirectoryName
+          . "$PSScriptRoot/tests/setupTest.ps1"
