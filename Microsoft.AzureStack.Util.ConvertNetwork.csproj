@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.Build.NoTargets/3.0.0">
+
+  <PropertyGroup>
+    <ProjectName>Microsoft.AzureStack.Util.ConvertNetwork</ProjectName>
+    <TargetFramework>net8.0</TargetFramework>
+    <Platform>x64</Platform>
+    <Version Condition="'$(Version)'==''">1.0.0</Version>
+    <Configuration Condition="'$(Configuration)'==''">Debug</Configuration>
+    <BinariesBuildDirectory>$(MSBuildProjectDirectory)\out</BinariesBuildDirectory>
+    <Package>$(MSBuildProjectDirectory)\out\packages</Package>
+    <PesterVersion>5.2.0</PesterVersion>
+    <!-- Set the custom NuGet packages directory -->
+    <RestorePackagesPath>$(MSBuildProjectDirectory)\out\packages</RestorePackagesPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Pester" Version="$(PesterVersion)" />
+  </ItemGroup>
+
+  <Target Name="PlaceFiles" AfterTargets="Build">
+    <Copy SourceFiles="$(MSBuildProjectDirectory)\src\Microsoft.AzureStack.Util.ConvertNetwork.psd1" DestinationFolder="$(BinariesBuildDirectory)\$(ProjectName)" />
+    <Copy SourceFiles="$(MSBuildProjectDirectory)\src\Microsoft.AzureStack.Util.ConvertNetwork.psm1" DestinationFolder="$(BinariesBuildDirectory)\$(ProjectName)" />
+  </Target>
+
+  <Target Name="CopyPester" AfterTargets="PlaceFiles">
+    <!-- Include all files recursively from the Pester package directory -->
+    <ItemGroup>
+      <PesterFiles Include="$(RestorePackagesPath)\pester\$(PesterVersion)\tools\**\*" Exclude="*.nupkg;*.nuspec" />
+    </ItemGroup>
+    <Copy SourceFiles="@(PesterFiles)" DestinationFolder="$(BinariesBuildDirectory)\PowerShell\Modules\Pester\$(PesterVersion)\%(RecursiveDir)" />
+  </Target>
+
+</Project>
