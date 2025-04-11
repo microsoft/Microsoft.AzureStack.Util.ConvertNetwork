@@ -30,7 +30,7 @@ To install the module, clone this repository and import the module into your Pow
 
 ```powershell
 git clone https://github.com/microsoft/Microsoft.AzureStack.Util.ConvertNetwork.git
-Import-Module [Microsoft.AzureStack.Util.ConvertNetwork.psm1](http://_vscodecontentref_/3)
+Import-Module ./Microsoft.AzureStack.Util.ConvertNetwork.psm1
 ```
 
 ## Usage
