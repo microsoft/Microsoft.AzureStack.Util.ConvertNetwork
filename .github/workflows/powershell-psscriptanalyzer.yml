@@ -61,7 +61,7 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          $pesterPath = "${GITHUB_WORKSPACE}/Tests"
+          $pesterPath = "$($ENV:GITHUB_WORKSPACE)/tests"
           Write-Verbose -Message "Running Pester tests...Pester path: $pesterPath" -Verbose
           . "$pesterPath/setupTest.ps1"
       - name: Upload Test Results
