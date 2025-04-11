@@ -1,6 +1,7 @@
 # Microsoft.AzureStack.Util.ConvertNetwork
 
-[![Build Status](https://img.shields.io/github/actions/workflow/status/microsoft/Microsoft.AzureStack.Util.ConvertNetwork/powershell-psscriptanalyzer.yml?branch=main)](https://github.com/microsoft/Microsoft.AzureStack.Util.ConvertNetwork/actions)
+[![Pester Unit Tests](https://github.com/microsoft/Microsoft.AzureStack.Util.ConvertNetwork/actions/workflows/powershell-pester-test.yml/badge.svg)](https://github.com/microsoft/Microsoft.AzureStack.Util.ConvertNetwork/actions/workflows/powershell-pester-test.yml)
+[![PSScriptAnalyzer](https://github.com/microsoft/Microsoft.AzureStack.Util.ConvertNetwork/actions/workflows/powershell-psscriptanalyzer.yml/badge.svg)](https://github.com/microsoft/Microsoft.AzureStack.Util.ConvertNetwork/actions/workflows/powershell-psscriptanalyzer.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 ## Overview
@@ -32,6 +33,20 @@ To install the module, clone this repository and import the module into your Pow
 git clone https://github.com/microsoft/Microsoft.AzureStack.Util.ConvertNetwork.git
 Import-Module .\src\Microsoft.AzureStack.Util.ConvertNetwork.psm1
 ```
+
+### Unit-Testing
+
+Requirements:
+
+- dotnet8 sdk
+
+To install dotnet 8 see https://dotnet.microsoft.com/en-us/download/dotnet/8.0
+
+The build step will download the required pester NuGet package before executing the test.
+
+The Pester testing script expects a dotnet build to be executed before running the test.  The build step will place the script into an `<repo-root>/out` directory then execute the test on that script.  The test results will be place in `<repo-root>/out/Tests`.
+
+Upon a pull-request, the unit-test will be performed against the script.  A passing unit-test will be required before any changes are approved.
 
 ## Usage
 
@@ -176,24 +191,7 @@ This project is licensed under the [MIT License](LICENSE).
 If you encounter any issues or have questions, please file an issue in the [GitHub Issues](https://github.com/microsoft/Microsoft.AzureStack.Util.ConvertNetwork/issues) section.
 
 ## Contributing
-
-We welcome contributions! To get started, follow these steps:
-
-1. Fork the repository.
-2. Create a new branch for your feature or bug fix.
-3. Commit your changes and submit a pull request.
-
-This project welcomes contributions and suggestions.  Most contributions require you to agree to a
-Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
-the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
-
-When you submit a pull request, a CLA bot will automatically determine whether you need to provide
-a CLA and decorate the PR appropriately (e.g., status check, comment). Simply follow the instructions
-provided by the bot. You will only need to do this once across all repos using our CLA.
-
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
-For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
-contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+[Contributing](CONTRIBUTING.md).
 
 ## Code of Conduct
 
