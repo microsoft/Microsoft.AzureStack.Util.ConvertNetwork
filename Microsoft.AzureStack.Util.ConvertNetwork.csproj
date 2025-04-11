@@ -15,7 +15,7 @@
 
   <ItemGroup>
     <PackageReference Include="Pester" Version="$(PesterVersion)" />
-  </ItemGroup>  
+  </ItemGroup>
 
   <Target Name="PlaceFiles" AfterTargets="Build">
     <Copy SourceFiles="$(MSBuildProjectDirectory)\src\Microsoft.AzureStack.Util.ConvertNetwork.psd1" DestinationFolder="$(BinariesBuildDirectory)\$(ProjectName)" />

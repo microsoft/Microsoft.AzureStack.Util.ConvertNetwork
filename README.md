@@ -1,6 +1,7 @@
 # Microsoft.AzureStack.Util.ConvertNetwork
 
-[![Build Status](https://img.shields.io/github/actions/workflow/status/microsoft/Microsoft.AzureStack.Util.ConvertNetwork/powershell-psscriptanalyzer.yml?branch=main)](https://github.com/microsoft/Microsoft.AzureStack.Util.ConvertNetwork/actions)
+[![Pester Unit Tests](https://github.com/microsoft/Microsoft.AzureStack.Util.ConvertNetwork/actions/workflows/powershell-pester-test.yml/badge.svg)](https://github.com/microsoft/Microsoft.AzureStack.Util.ConvertNetwork/actions/workflows/powershell-pester-test.yml)
+[![PSScriptAnalyzer](https://github.com/microsoft/Microsoft.AzureStack.Util.ConvertNetwork/actions/workflows/powershell-psscriptanalyzer.yml/badge.svg)](https://github.com/microsoft/Microsoft.AzureStack.Util.ConvertNetwork/actions/workflows/powershell-psscriptanalyzer.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 ## Overview
@@ -32,6 +33,20 @@ To install the module, clone this repository and import the module into your Pow
 git clone https://github.com/microsoft/Microsoft.AzureStack.Util.ConvertNetwork.git
 Import-Module .\src\Microsoft.AzureStack.Util.ConvertNetwork.psm1
 ```
+
+### Unit-Testing
+
+Requirements:
+
+- dotnet8 sdk
+
+To install dotnet 8 see https://dotnet.microsoft.com/en-us/download/dotnet/8.0
+
+The build step will download the required pester NuGet package before executing the test.
+
+The Pester testing script expects a dotnet build to be executed before running the test.  The build step will place the script into an `<repo-root>/out` directory then execute the test on that script.  The test results will be place in `<repo-root>/out/Tests`.
+
+Upon a pull-request, the unit-test will be performed against the script.  A passing unit-test will be required before any changes are approved.
 
 ## Usage
 
