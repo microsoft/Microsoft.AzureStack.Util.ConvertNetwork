@@ -68,4 +68,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ubuntu-Unit-Tests
-          path: "${GITHUB_WORKSPACE}/out/Tests"
+          path: out/Tests"
