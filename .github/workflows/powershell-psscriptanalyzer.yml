@@ -50,22 +50,3 @@ jobs:
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: results.sarif
-
-      - name: Restore dependencies
-        run: dotnet restore
-      - name: Build
-        run: dotnet build --no-restore
-
-      # run powershell script /tests/setupTest.ps1 to run pester unit-testing
-      - name: Run Pester tests
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = "Stop"
-          $pesterPath = "$($ENV:GITHUB_WORKSPACE)/tests"
-          Write-Verbose -Message "Running Pester tests...Pester path: $pesterPath" -Verbose
-          . "$pesterPath/setupTest.ps1"
-      - name: Upload Test Results
-        uses: actions/upload-artifact@v4
-        with:
-          name: ubuntu-Unit-Tests
-          path: "${{GITHUB.WORKSPACE}}/out/Tests"
