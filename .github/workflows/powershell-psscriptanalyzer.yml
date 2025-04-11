@@ -34,7 +34,7 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
-      - name: Run PSScriptAnalyzer
+      - name: Run PSScriptAnalyzer       
         uses: microsoft/psscriptanalyzer-action@6b2948b1944407914a58661c49941824d149734f
         with:
           # Check https://github.com/microsoft/action-psscriptanalyzer for more info about the options.
@@ -61,5 +61,9 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          $PSScriptRoot = (Get-Item -Path $MyInvocation.MyCommand.Path).DirectoryName
-          . "$PSScriptRoot/tests/setupTest.ps1"
+          . "${GITHUB_WORKSPACE}/tests/setupTest.ps1"
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: ubuntu-Unit-Tests
+          path: "${GITHUB_WORKSPACE}/out/Tests"
