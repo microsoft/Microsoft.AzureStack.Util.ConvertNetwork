@@ -61,7 +61,9 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          . "${GITHUB_WORKSPACE}/tests/setupTest.ps1"
+          $pesterPath = "${GITHUB_WORKSPACE}/Tests"
+          Write-Verbose -Message "Running Pester tests...Pester path: $pesterPath" -Verbose
+          . "$pesterPath/setupTest.ps1"
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
         with:
