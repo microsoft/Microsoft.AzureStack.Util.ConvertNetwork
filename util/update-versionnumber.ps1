@@ -37,7 +37,7 @@ param (
 
 # Validate the directory
 if (-not (Test-Path -Path $Directory)) {
-    Write-Error "The specified directory does not exist: $Directory"
+    Write-Error "$($MyInvocation.MyCommand.Name) - The specified directory does not exist: $Directory"
     exit 1
 }
 
@@ -45,27 +45,30 @@ if (-not (Test-Path -Path $Directory)) {
 $psd1Files = Get-ChildItem -Path $Directory -Recurse -Filter "*.psd1"
 
 if ($psd1Files.Count -eq 0) {
-    Write-Host "No *.psd1 files found in the specified directory: $Directory"
+    Write-Host "$($MyInvocation.MyCommand.Name) -No *.psd1 files found in the specified directory: $Directory"
     exit 0
 }
 
 # Update the ModuleVersion in each *.psd1 file
 foreach ($file in $psd1Files) {
     try {
-        # Import the .psd1 file as a hashtable
-        $moduleData = Import-PowerShellDataFile -Path $file.FullName
+        Write-Host "$($MyInvocation.MyCommand.Name) - Processing file: $($file.FullName)" -ForegroundColor Yellow
 
-        # Update the ModuleVersion field
-        $moduleData.ModuleVersion = $Version.ToString()
+        # Read the file content as an array of lines
+        $fileContent = Get-Content -Path $file.FullName
 
-        # Write the updated hashtable back to the file
-        $moduleData | Out-File -FilePath $file.FullName -Encoding UTF8
+        # Update the ModuleVersion line
+        $updatedContent = $fileContent -replace "ModuleVersion\s*=\s*[`"|\'](.*?)[`"|\']", "ModuleVersion = '$Version'"
 
-        Write-Host "Updated ModuleVersion in file: $($file.FullName)" -ForegroundColor Green
+        # Write the updated content back to the file
+        $updatedContent | Set-Content -Path $file.FullName -Encoding UTF8
+
+        Write-Host "$($MyInvocation.MyCommand.Name) - Updated ModuleVersion in file: $($file.FullName)" -ForegroundColor Green
+        Write-Host "$($MyInvocation.MyCommand.Name) - New ModuleVersion: $Version" -ForegroundColor Green
     }
     catch {
-        Write-Error "Failed to update file: $($file.FullName). Error: $_"
+        Write-Error "$($MyInvocation.MyCommand.Name) - Failed to update file: $($file.FullName). Error: $_"
     }
 }
 
-Write-Host "ModuleVersion update completed." -ForegroundColor Cyan
+Write-Host "$($MyInvocation.MyCommand.Name) - ModuleVersion update completed." -ForegroundColor Cyan

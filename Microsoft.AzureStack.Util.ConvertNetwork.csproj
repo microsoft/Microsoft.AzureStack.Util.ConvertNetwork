@@ -7,17 +7,46 @@
     <Version Condition="'$(Version)'==''">1.0.0</Version>
     <Configuration Condition="'$(Configuration)'==''">Debug</Configuration>
     <BinariesBuildDirectory>$(MSBuildProjectDirectory)\out</BinariesBuildDirectory>
-    <Package>$(MSBuildProjectDirectory)\out\packages</Package>
-    <PesterVersion>5.2.0</PesterVersion>
-    <!-- Set the custom NuGet packages directory -->
-    <RestorePackagesPath>$(MSBuildProjectDirectory)\out\packages</RestorePackagesPath>
+    <PesterVersion>5.2.0</PesterVersion> <!--Used for Unit-Testing only -->
+    <RestorePackagesPath>$(MSBuildProjectDirectory)\packages</RestorePackagesPath>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <PackageTags>AzureStack, Utility, Network, Subneting</PackageTags>
+    <RepositoryUrl>https://github.com/microsoft/$(ProjectName)</RepositoryUrl>
+    <Description>Microsoft.AzureStack.Util.ConvertNetwork is a PowerShell module that provides utilities for working with IPv4 networks. It includes functions to calculate subnet masks, CIDR values, broadcast addresses, and more. This project is designed to simplify network-related operations for developers and IT professionals.</Description>
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- NuGet Import -->
     <PackageReference Include="Pester" Version="$(PesterVersion)" />
   </ItemGroup>
 
+  <Target Name="LogNuGetPackages" AfterTargets="Restore">
+    <ItemGroup>
+      <!-- Collect all restored NuGet packages -->
+      <RestoredPackages Include="$(RestorePackagesPath)\**\*.nupkg" />
+    </ItemGroup>
+    <Message Text="[LogNuGetPackages] Restored NuGet Package: %(RestoredPackages.Identity)" Importance="high" />
+  </Target>
+
+  <Target Name="CustomClean" BeforeTargets="Clean">
+    <Message Text="Cleaning up the project...$(BinariesBuildDirectory)" Importance="high" Condition="Exists('$(BinariesBuildDirectory)')" />
+    <Message Text="Cleaning up the project...$(RestorePackagesPath)" Importance="high" Condition="Exists('$(RestorePackagesPath)')" />
+    <Message Text="Cleaning up the project...$(MSBuildProjectDirectory)\PowerShell" Importance="high" Condition="Exists('$(MSBuildProjectDirectory)\PowerShell')" />
+    <Message Text="Cleaning up the project...$(MSBuildProjectDirectory)\temp" Importance="high" Condition="Exists('$(MSBuildProjectDirectory)\temp')" />
+    <Message Text="Cleaning up the project...$(MSBuildProjectDirectory)\obj" Importance="high" Condition="Exists('$(MSBuildProjectDirectory)\obj')" />
+    <Message Text="Cleaning up the project...$(MSBuildProjectDirectory)\bin" Importance="high" Condition="Exists('$(MSBuildProjectDirectory)\bin')" />
+
+    <RemoveDir Directories="$(BinariesBuildDirectory)" Condition="Exists('$(BinariesBuildDirectory)')" />
+    <RemoveDir Directories="$(RestorePackagesPath)" Condition="Exists('$(RestorePackagesPath)')" />
+    <RemoveDir Directories="$(MSBuildProjectDirectory)\PowerShell" Condition="Exists('$(MSBuildProjectDirectory)\PowerShell')" />
+    <RemoveDir Directories="$(MSBuildProjectDirectory)\temp" Condition="Exists('$(MSBuildProjectDirectory)\temp')" />
+    <RemoveDir Directories="$(MSBuildProjectDirectory)\obj" Condition="Exists('$(MSBuildProjectDirectory)\obj')" />
+    <RemoveDir Directories="$(MSBuildProjectDirectory)\bin" Condition="Exists('$(MSBuildProjectDirectory)\bin')" />
+  </Target>
+
   <Target Name="PlaceFiles" AfterTargets="Build">
+    <Message Text="[PlaceFiles] Copying files to $(BinariesBuildDirectory)\$(ProjectName)\Microsoft.AzureStack.Util.ConvertNetwork.psd1" Importance="high" />
+    <Message Text="[PlaceFiles] Copying files to $(BinariesBuildDirectory)\$(ProjectName)\Microsoft.AzureStack.Util.ConvertNetwork.psm1" Importance="high" />
     <Copy SourceFiles="$(MSBuildProjectDirectory)\src\Microsoft.AzureStack.Util.ConvertNetwork.psd1" DestinationFolder="$(BinariesBuildDirectory)\$(ProjectName)" />
     <Copy SourceFiles="$(MSBuildProjectDirectory)\src\Microsoft.AzureStack.Util.ConvertNetwork.psm1" DestinationFolder="$(BinariesBuildDirectory)\$(ProjectName)" />
   </Target>
@@ -27,7 +56,20 @@
     <ItemGroup>
       <PesterFiles Include="$(RestorePackagesPath)\pester\$(PesterVersion)\tools\**\*" Exclude="*.nupkg;*.nuspec" />
     </ItemGroup>
-    <Copy SourceFiles="@(PesterFiles)" DestinationFolder="$(BinariesBuildDirectory)\PowerShell\Modules\Pester\$(PesterVersion)\%(RecursiveDir)" />
+    <Copy SourceFiles="@(PesterFiles)" DestinationFolder="$(MSBuildProjectDirectory)\PowerShell\Modules\Pester\$(PesterVersion)\%(RecursiveDir)" />
+    <Message Text="[CopyPester] Copying Pester files to $(MSBuildProjectDirectory)\PowerShell\Modules\Pester\$(PesterVersion)" Importance="high" Condition="Exists('$(RestorePackagesPath)\pester')" />
+  </Target>
+ 
+  <Target Name="UpdateVersionNumber" AfterTargets="PlaceFiles">
+    <Message Text="[UpdateVersionNumber] Running update-versionnumber.ps1" Importance="high" Condition="Exists('$(MSBuildProjectDirectory)\util\update-versionnumber.ps1')" />
+    <Exec Command="pwsh -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command &quot;&amp; { &amp; '$(MSBuildProjectDirectory)\util\update-versionnumber.ps1' -Directory '$(BinariesBuildDirectory)\$(ProjectName)' -Version '$(Version)' }&quot;" />
+    <Message Text="[UpdateVersionNumber] Finished running update-versionnumber.ps1" Importance="high" Condition="Exists('$(MSBuildProjectDirectory)\util\update-versionnumber.ps1')" />
+  </Target>
+
+  <Target Name="NuSpecJob" AfterTargets="UpdateVersionNumber">
+    <Message Text="[NuSpecJob] Running set-nuspecfile.ps1" Importance="high" Condition="Exists('$(MSBuildProjectDirectory)\util\set-nuspecfile.ps1')" />
+    <Exec Command="pwsh -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command &quot;&amp; { &amp; '$(MSBuildProjectDirectory)\util\set-nuspecfile.ps1' -DirectoryPath '$(BinariesBuildDirectory)\$(ProjectName)' -PackageName '$(ProjectName)' -Version '$(Version)' -RepoUrl '$(RepositoryUrl)' -Description '$(Description)'}&quot;" />
+    <Message Text="[NuSpecJob] Generating NuGet spec file" Importance="high" Condition="Exists('$(BinariesBuildDirectory)\$(ProjectName)\$(ProjectName).nuspec')" />
   </Target>
 
 </Project>
