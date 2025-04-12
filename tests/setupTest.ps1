@@ -3,7 +3,7 @@
 $parentPath = (Get-Item $PSScriptRoot).Parent.FullName
 
 Remove-Module Pester -Force -ErrorAction SilentlyContinue
-Import-Module (Join-Path -Path $parentPath -ChildPath 'out\PowerShell\Modules\Pester') -Force
+Import-Module (Join-Path -Path $parentPath -ChildPath 'PowerShell\Modules\Pester') -Force
 New-Item -Path (Join-Path -Path $parentPath -ChildPath 'out\Tests') -ItemType Directory -Force | Out-Null
 
 $config = New-PesterConfiguration
